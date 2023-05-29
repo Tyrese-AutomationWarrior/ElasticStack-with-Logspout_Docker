@@ -1,0 +1,169 @@
+version: '2.16'
+
+services:
+  
+  elasticsearch:
+    image: elasticsearch:${elk_stack_version}
+    hostname: ${es_hostname}
+    volumes:
+
+      #elasticsearch config file
+      - type: bind
+        source: elasticsearch/config/elasticsearch.yml
+        target: /usr/share/elasticsearch/config/elasticsearch.yml
+        read_only: true
+
+      #elasticsearch data volume
+      - type: volume
+        source: elasticsearch_data
+        target: /usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+
+      # Use single node discovery in order to disable production mode and avoid bootstrap checks.
+      # see: https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
+      discovery.type: ${discovery_type}
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+      ES_USE_IPV4: ${ES_USE_IPV4}
+    deploy:
+      resources:
+        limits:
+
+        #ram usage limit
+          memory: ${MEMORY_LIMIT}
+    healthcheck:
+
+      #testing elasticsearch health status 
+      test: curl --silent --fail localhost:9200/_cluster/health || exit 1
+      interval: 1m
+      timeout: 1m
+      retries: 3     
+      start_period: 50s
+    networks:
+      - elk
+    restart: unless-stopped
+
+  logstash:
+    image: logstash:${elk_stack_version}
+    hostname: ${ls_hostname}
+    volumes:
+
+      #logstash config file
+      - type: bind
+        source: logstash/config/logstash.yml
+        target: /usr/share/logstash/config/logstash.yml
+        read_only: true
+
+      #logstash pipiline file
+      - type: bind
+        source: logstash/pipeline/logstash.conf
+        target: /usr/share/logstash/pipeline/logstash.conf
+        read_only: true
+    ports:
+      - 5000:5000
+      - 9600:9600
+    environment:
+      LS_JAVA_OPTS: -Xms256m -Xmx256m
+    deploy:
+      resources:
+        limits:
+
+          #ram usage limit
+          memory: ${MEMORY_LIMIT}
+    networks:
+      - elk
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+
+      # Testing logstash health status
+      test: curl --silent --fail localhost:9600/?pretty || exit 1
+      interval: 1m
+      timeout: 1m
+      retries: 3      
+      start_period: 50s
+    restart: unless-stopped
+
+
+  kibana:
+    image: kibana:${elk_stack_version}
+    hostname: ${kb_hostname}
+    volumes:
+
+      #kibana config file
+      - type: bind
+        source: kibana/config/kibana.yml
+        target: /usr/share/kibana/config/kibana.yml
+        read_only: true
+    ports:
+      - 5601:5601
+    deploy:
+      resources:
+        limits:
+
+          #ram usage limit
+          memory: ${MEMORY_LIMIT}  
+    networks:
+      - elk
+    depends_on:
+      logstash:
+        condition: service_healthy
+    healthcheck:
+
+      #Testing kibana health status
+      test: curl --silent --fail localhost:5601/status || exit 1
+      interval: 1m
+      timeout: 1m
+      retries: 3      
+      start_period: 50s
+    restart: unless-stopped
+
+  logspout:
+    image: gliderlabs/logspout
+    hostname: ${lg_hostname}
+    command:  syslog://logstash:5000
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+    environment:
+      ALLOW_TTY: ${ALLOW_TTY}
+      DEBUG: ${DEBUG}
+    deploy:
+      resources:
+        limits:
+
+          #ram usage limit
+          memory: ${MEMORY_LIMIT}
+    networks:
+      - elk
+    depends_on:
+      kibana:
+        condition: service_healthy
+    restart: unless-stopped
+
+#Network for the ELK stack 
+networks:
+  elk:
+    driver: overlay
+    attachable: true
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
+          ip_range: 172.28.5.0/24
+          aux_addresses:
+            elasticsearch: 172.28.5.2
+            logstash: 172.28.5.3
+            kibana: 172.28.5.3
+            logspout: 172.28.5.4
+    
+volumes:
+  elasticsearch_data:
+      
+
+
+
