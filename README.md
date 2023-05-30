@@ -68,6 +68,8 @@ Start stack components:
 ```sh
 docker-compose up -p elk
 ```
+![Animated demo](https://github.com/iskandaryansergey/elk-docker-compose/blob/main/gif/up.gif)
+
 
 > **Note**  
 > You can also run all services in the background (detached mode) by appending the `-d` flag to the above command.
@@ -84,6 +86,7 @@ In order to entirely shutdown the stack and remove all persisted data, use the f
 ```sh
 docker-compose -p elk down -v
 ```
+![Animated demo](https://github.com/iskandaryansergey/elk-docker-compose/blob/main/gif/remove.gif)
 
 ### How to configure Elasticsearch
 
@@ -120,6 +123,25 @@ logstash:
 
   environment:
     LS_JAVA_OPTS: -Xms256m -Xmx256m
+```
+
+## Healthcheck
+
+Each service has its own healthcheck, which you can change or update in the compose file. 
+```yml
+
+elasticsearch:
+  healthcheck:
+    test: curl --silent --fail localhost:9200/_cluster/health || exit 1
+    
+logstash:
+  healthcheck:
+    test: curl --silent --fail localhost:9600/?pretty || exit 1
+    
+kibana:
+  healthcheck:
+     test: curl --silent --fail localhost:5601/status || exit 1
+
 ```
 
 ## JVM tuning
