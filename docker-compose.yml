@@ -158,8 +158,8 @@ networks:
           aux_addresses:
             elasticsearch: 172.28.5.2
             logstash: 172.28.5.3
-            kibana: 172.28.5.3
-            logspout: 172.28.5.4
+            kibana: 172.28.5.4
+            logspout: 172.28.5.5
     
 volumes:
   elasticsearch_data:
