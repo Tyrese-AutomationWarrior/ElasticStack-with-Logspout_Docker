@@ -1,5 +1,6 @@
 # Elastic stack (ELK) with Logspout  on Docker
 [![Elastic Stack version](https://img.shields.io/badge/Elastic%20Stack-8.7.1-00bfb3?style=flat&logo=elastic-stack)](https://www.elastic.co/blog/category/releases)
+[![License](https://img.shields.io/github/license/iskandaryansergey/elk-docker-compose)](LICENSE)
 
 Elastic stack (ELK) on Docker with Logspout
 Run the 8.7.1 version of the Elastic stack and Logspout(log router for Docker containers) with Docker and Docker Compose.
@@ -30,14 +31,14 @@ It is a reliable and quick method for learning how the ELK stack works with the 
 
 ### Host setup
 
-* [Docker Engine][docker-install] version **23.0.1** or newer
-* [Docker Compose][compose-install] version **2.16.0** or newer (including [Compose V2][compose-v2])
+* [Docker Engine](https://docs.docker.com/get-docker/)version **23.0.1** or newer
+* [Docker Compose](https://docs.docker.com/compose/install/)version **2.16.0** or newer (including [Compose V2](https://docs.docker.com/compose/compose-v2/))
 * 1.5 GB of RAM
 * OS should be Linux's kernel based (Arch, Ubuntu, RedHat)
 * Ensure that your user is able to work with docker daemon and interact with docker sock
 
 > **Note**  
-> Especially on Linux, make sure your user has the [required permissions][linux-postinstall] to interact with the Docker
+> Especially on Linux, make sure your user has the [required permissions](https://docs.docker.com/engine/install/linux-postinstall/) to interact with the Docker
 > daemon. 
 
 By default, the stack exposes the following ports:
@@ -49,7 +50,7 @@ By default, the stack exposes the following ports:
 * 5601: Kibana
 
 > **Warning**  
-> Elasticsearch's [bootstrap checks][https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html] were purposely disabled to facilitate the setup of the Elastic
+> Elasticsearch's [bootstrap checks](https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html) were purposely disabled to facilitate the setup of the Elastic
 > stack in development environments. For production setups, I recommend users to set up their host according to the
 > instructions from the Elasticsearch documentation: [Important System Configuration](https://www.elastic.co/guide/en/elasticsearch/reference/current/system-config.html)
 
