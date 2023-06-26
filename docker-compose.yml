@@ -148,7 +148,6 @@ services:
 #Network for the ELK stack 
 networks:
   elk:
-    driver: overlay
     attachable: true
     ipam:
       driver: default
